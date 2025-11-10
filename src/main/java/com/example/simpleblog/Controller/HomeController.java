@@ -32,13 +32,11 @@ public class HomeController {
     public String home(Model model) {
         List<Post> posts = postService.findAll();
 
-        // Получаем последние 3 комментария к каждому посту
         Map<Long, List<Comment>> postComments = new HashMap<>();
         for (Post post : posts) {
             List<Comment> comments = commentService.getRecentCommentsByPostId(post.getId(), 3);
             postComments.put(post.getId(), comments);
         }
-
         model.addAttribute("posts", posts);
         model.addAttribute("postComments", postComments);
         return "index";

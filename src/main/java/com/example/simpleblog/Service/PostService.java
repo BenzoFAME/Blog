@@ -27,7 +27,12 @@ public class PostService {
         return postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("not found"));
     }
-
+    public void addLike(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("not found"));
+        post.setLikes(post.getLikes() + 1);
+        postRepository.save(post);
+    }
     public void addPost(Post post , MultipartFile file1 , MultipartFile file2 , MultipartFile file3) throws IOException {
         List<MultipartFile> files = List.of(file1, file2, file3);
         boolean previewSet = false;

@@ -21,16 +21,16 @@ public class CommentController {
     @PostMapping("/add/{postId}")
     public String addComment(@PathVariable Long postId , String text) {
         Comment comment = commentService.addComment(postId, text);
-        return "redirect:/posts/";
+        return "redirect:/";
     }
     @PostMapping("/delete/{commentId}")
     public String deleteComment(@PathVariable Long commentId) {
         commentService.deleteComment(commentId);
-        return "redirect:/posts/";
+        return "redirect:/";
     }
     @PostMapping("/update/{commentId}")
     public String updateComment(@PathVariable Long commentId , String text) {
         commentService.updateComment(commentId, text);
-        return "redirect:/posts/";
+        return "redirect:/";
     }
 }

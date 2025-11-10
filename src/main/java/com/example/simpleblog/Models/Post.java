@@ -26,7 +26,7 @@ public class Post {
     private User author;
     @OneToMany(mappedBy = "post" , cascade = CascadeType.ALL , orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
-
+    private int likes = 0;
     @ManyToMany
     @JoinTable(
             name = "post_tags",

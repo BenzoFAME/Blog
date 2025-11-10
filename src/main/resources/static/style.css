@@ -1,0 +1,17 @@
+body {
+    background-color: #fafafa;
+}
+.navbar-brand {
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+.card {
+    border-radius: 12px;
+}
+.card img {
+    border-radius: 0 0 12px 12px;
+}
+form input:focus {
+    box-shadow: 0 0 3px rgba(0,123,255,0.5);
+    border-color: #007bff;
+}
