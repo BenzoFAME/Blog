@@ -4,199 +4,156 @@
     <meta charset="UTF-8">
     <title th:text="${post.title}">Просмотр поста</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
-        body {
-            background-color: #fafafa;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        .navbar {
-            background-color: #fff;
-            border-bottom: 1px solid #dbdbdb;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .logo-text {
-            font-weight: 700;
-            font-size: 28px;
-            background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-            user-select: none;
-        }
-
-        .post-card {
-            background-color: white;
-            border: 1px solid #dbdbdb;
-            border-radius: 10px;
-            overflow: hidden;
-            max-width: 700px;
-            margin: 30px auto;
-        }
-
-        .carousel-item img {
-            width: 100%;
-            height: auto;
-            object-fit: cover;
-        }
-
-        .post-content {
-            padding: 20px;
-        }
-
-        .comment-preview {
-            font-size: 14px;
-            color: #555;
-            margin-top: 8px;
-        }
-
-        .comment-preview span {
-            font-weight: 500;
-            color: #000;
-        }
-
-        .btn-add {
-            background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af);
-            border: none;
-            color: white;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .btn-add:hover {
-            opacity: 0.9;
-        }
-
-        .carousel-control-prev-icon,
-        .carousel-control-next-icon {
-            filter: invert(1);
-        }
-
-        .comment-form textarea {
-            resize: none;
-        }
-
-        /* ❤️ Лайки */
-        #like-btn {
-            font-size: 26px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        #like-btn.liked {
-            color: #e1306c;
-            transform: scale(1.2);
-        }
-        #like-count {
-            font-weight: 600;
-            font-size: 18px;
-            margin-left: 5px;
-        }
+        body { background:#fafafa; font-family:'Segoe UI', Roboto, Arial, sans-serif; }
+        .logo-text { font-weight:700; font-size:28px; background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af,#515bd4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .post-card { background:#fff; border:1px solid #dbdbdb; border-radius:10px; max-width:700px; margin:30px auto; overflow:hidden; }
+        .post-content { padding:20px; }
+        .btn-add { background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af); color:#fff; border-radius:10px; border:none; }
+        .comment-preview { font-size:14px; color:#555; margin-top:8px; }
+        #like-btn { font-size:26px; background:none; border:none; cursor:pointer; }
+        #like-btn.liked { color:#e1306c; transform:scale(1.15); }
+        #like-count { margin-left:6px; font-weight:600; }
     </style>
 </head>
 <body>
 
-<!-- 🔹 Верхняя панель -->
 <nav class="navbar navbar-light justify-content-between px-4 py-2">
-    <a href="/" class="logo-text text-decoration-none">EGOROV'S&nbsp;BLOG</a>
-    <div>
-        <a th:href="@{'/posts/edit/' + ${post.id}}" class="btn btn-sm btn-outline-primary me-2">✏️ Редактировать</a>
-        <a th:href="@{'/posts/delete/' + ${post.id}}" class="btn btn-sm btn-outline-danger"
-           onclick="return confirm('Удалить пост?')">🗑 Удалить</a>
+    <a class="logo-text text-decoration-none" th:href="@{/}">EGOROV'S&nbsp;BLOG</a>
+
+    <div class="d-flex align-items-center gap-2">
+        <a th:if="${#request.userPrincipal == null}" th:href="@{/login}" class="btn btn-sm btn-outline-secondary">Войти</a>
+        <a th:if="${#request.userPrincipal == null}" th:href="@{/registration}" class="btn btn-sm btn-outline-primary">Регистрация</a>
+
+        <div th:if="${#request.userPrincipal != null}" class="d-flex align-items-center gap-2">
+            <span class="text-muted">Привет, <strong th:text="${#request.userPrincipal.name}">user</strong></span>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button class="btn btn-outline-danger btn-sm">Выйти</button>
+            </form>
+        </div>
     </div>
 </nav>
 
-<!-- 🔹 Пост -->
 <div class="post-card shadow-sm">
-    <!-- ✅ Карусель изображений -->
+    <!-- carousel -->
     <div th:if="${post.images != null and !post.images.isEmpty()}">
         <div th:id="'carouselPost' + ${post.id}" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
-                <div th:each="image, iterStat : ${post.images}" class="carousel-item"
-                     th:classappend="${iterStat.index == 0} ? ' active'">
-                    <img th:src="@{'/images/' + ${image.id}}" alt="image" class="d-block w-100">
+                <div th:each="image, iterStat : ${post.images}" class="carousel-item" th:classappend="${iterStat.index == 0} ? ' active'">
+                    <img th:src="@{'/images/' + ${image.id}}" class="d-block w-100" alt="image">
                 </div>
             </div>
-
-            <button class="carousel-control-prev" type="button"
-                    th:attr="data-bs-target='#carouselPost' + ${post.id}" data-bs-slide="prev">
+            <button class="carousel-control-prev" type="button" th:attr="data-bs-target='#carouselPost' + ${post.id}" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon"></span>
             </button>
-            <button class="carousel-control-next" type="button"
-                    th:attr="data-bs-target='#carouselPost' + ${post.id}" data-bs-slide="next">
+            <button class="carousel-control-next" type="button" th:attr="data-bs-target='#carouselPost' + ${post.id}" data-bs-slide="next">
                 <span class="carousel-control-next-icon"></span>
             </button>
         </div>
     </div>
 
-    <!-- Если нет картинок -->
     <div th:if="${post.images == null or post.images.isEmpty()}">
-        <img th:if="${post.previewImageId != null}" th:src="@{'/images/' + ${post.previewImageId}}" alt="preview" class="w-100">
+        <img th:if="${post.previewImageId != null}" th:src="@{'/images/' + ${post.previewImageId}}" class="w-100" alt="preview">
     </div>
 
-    <!-- Текст -->
     <div class="post-content">
         <h3 th:text="${post.title}"></h3>
         <p class="text-muted" th:text="'Автор: ' + (${post.author != null ? post.author.username : 'Гость'})"></p>
         <p th:text="${post.content}"></p>
 
-        <!-- ❤️ Лайки -->
-        <div class="d-flex align-items-center mt-3">
-            <button id="like-btn" th:data-id="${post.id}">❤️</button>
+        <!-- кнопки редактирования для автора/админа -->
+        <div class="mb-3">
+            <a th:if="${#request.userPrincipal != null and (#request.userPrincipal.name == post.author.username || #request.isUserInRole('ROLE_ADMIN'))}"
+               th:href="@{'/posts/edit/' + ${post.id}}" class="btn btn-sm btn-outline-primary me-2">✏️ Редактировать</a>
+
+            <form th:if="${#request.userPrincipal != null and (#request.userPrincipal.name == post.author.username || #request.isUserInRole('ROLE_ADMIN'))}"
+                  th:action="@{'/posts/delete/' + ${post.id}}" method="post" style="display:inline" onsubmit="return confirm('Удалить пост?');">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn btn-sm btn-outline-danger">🗑 Удалить</button>
+            </form>
+        </div>
+
+        <!-- лайки -->
+        <div class="d-flex align-items-center">
+            <!-- если авторизован — кнопка AJAX -->
+            <button th:if="${#request.userPrincipal != null}" id="like-btn" th:data-id="${post.id}" class="me-2">❤️</button>
+
+            <!-- если не авторизован — ссылка на логин -->
+            <a th:if="${#request.userPrincipal == null}" th:href="@{/login}" class="me-2">❤️</a>
+
             <span id="like-count" th:text="${post.likes}">0</span>
         </div>
     </div>
 
-    <!-- 🔹 Комментарии -->
+    <!-- комментарии -->
     <div class="px-4 pb-4">
         <h5 class="mt-3 mb-3">Комментарии</h5>
+
         <div th:if="${comments != null and !comments.isEmpty()}">
             <div th:each="comment : ${comments}" class="comment-preview border-bottom pb-2 mb-2">
-                <span th:text="${comment.author != null ? comment.author.username : 'Гость'}"></span>:
+                <strong th:text="${comment.author != null ? comment.author.username : 'Гость'}"></strong>:
                 <span th:text="${comment.text}"></span>
             </div>
         </div>
+
         <div th:if="${comments == null or comments.isEmpty()}">
             <p class="text-muted">Комментариев пока нет.</p>
         </div>
 
-        <!-- 🔹 Добавить комментарий -->
-        <form class="comment-form mt-3" th:action="@{'/comments/add/' + ${post.id}}" method="post">
-            <textarea class="form-control mb-2" name="text" rows="2" placeholder="Напишите комментарий..." required></textarea>
-            <button class="btn btn-add w-100" type="submit">Отправить</button>
-        </form>
+        <!-- форма комментария: только для авторизованных -->
+        <div th:if="${#request.userPrincipal != null}">
+            <form th:action="@{'/comments/add/' + ${post.id}}" method="post" class="mt-3">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <textarea class="form-control mb-2" name="text" rows="2" placeholder="Напишите комментарий..." required></textarea>
+                <button class="btn btn-add w-100" type="submit">Отправить</button>
+            </form>
+        </div>
+
+        <div th:if="${#request.userPrincipal == null}" class="mt-3">
+            <a th:href="@{/login}" class="btn btn-outline-primary w-100">Войдите, чтобы оставить комментарий</a>
+        </div>
     </div>
 </div>
 
-<!-- 🔹 Bootstrap + JS для лайков -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // CSRF для AJAX
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
     document.addEventListener("DOMContentLoaded", () => {
         const likeBtn = document.getElementById("like-btn");
         const likeCount = document.getElementById("like-count");
+        if (!likeBtn) return;
 
         likeBtn.addEventListener("click", async () => {
             const postId = likeBtn.dataset.id;
+            // toggle UI
             likeBtn.classList.toggle("liked");
 
-            const response = await fetch(`/posts/like/${postId}`, { method: "POST" });
+            const resp = await fetch(`/posts/like/${postId}`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                }
+            });
 
-            if (response.ok) {
-                const newLikes = await response.text();
-                likeCount.textContent = newLikes;
+            if (resp.ok) {
+                const txt = await resp.text();
+                likeCount.textContent = txt;
+            } else if (resp.status === 401) {
+                window.location = '/login';
             } else {
-                alert("Ошибка при добавлении лайка 😢");
+                alert("Ошибка при лайке");
             }
         });
     });
 </script>
-
 </body>
 </html>
 

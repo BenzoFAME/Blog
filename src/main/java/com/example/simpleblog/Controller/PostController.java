@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -22,8 +23,8 @@ public class PostController {
         this.commentService = commentService;
     }
     @PostMapping("/add")
-    public String addPost(@ModelAttribute Post post , @RequestParam("file1")MultipartFile file1,@RequestParam("file2")MultipartFile file2,@RequestParam("file3")MultipartFile file3) throws IOException {
-        postService.addPost(post , file1,file2,file3);
+    public String addPost(@ModelAttribute Post post , @RequestParam("file1")MultipartFile file1, @RequestParam("file2")MultipartFile file2, @RequestParam("file3")MultipartFile file3 , Principal principal) throws IOException {
+        postService.addPost(post , file1,file2,file3 , principal.getName());
         return "redirect:/";
     }
     @GetMapping("/add")

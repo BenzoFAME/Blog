@@ -1,5 +1,6 @@
 package com.example.simpleblog.Models;
 
+import com.example.simpleblog.entity.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,9 +21,12 @@ public class User {
     private String username;
     private String password;
     private String email;
+    private boolean enabled;
     @OneToMany(mappedBy = "author" , cascade = CascadeType.ALL , orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
     @OneToMany(mappedBy = "author" , cascade = CascadeType.ALL , orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 }

@@ -2,8 +2,10 @@ package com.example.simpleblog.Service;
 
 import com.example.simpleblog.Models.Image;
 import com.example.simpleblog.Models.Post;
+import com.example.simpleblog.Models.User;
 import com.example.simpleblog.Repository.ImageRepository;
 import com.example.simpleblog.Repository.PostRepository;
+import com.example.simpleblog.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,10 +16,12 @@ import java.util.List;
 public class PostService {
     private final PostRepository postRepository;
     private final ImageRepository imageRepository;
+    private final UserRepository userRepository;
 
-    public PostService(PostRepository postRepository , ImageRepository imageRepository) {
+    public PostService(PostRepository postRepository , ImageRepository imageRepository , UserRepository userRepository) {
         this.postRepository = postRepository;
         this.imageRepository = imageRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Post> findAll() {
@@ -33,7 +37,8 @@ public class PostService {
         post.setLikes(post.getLikes() + 1);
         postRepository.save(post);
     }
-    public void addPost(Post post , MultipartFile file1 , MultipartFile file2 , MultipartFile file3) throws IOException {
+    public void addPost(Post post , MultipartFile file1 , MultipartFile file2 , MultipartFile file3 ,String userEmail) throws IOException {
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new RuntimeException("not found"));
         List<MultipartFile> files = List.of(file1, file2, file3);
         boolean previewSet = false;
         for (MultipartFile file : files) {
@@ -46,6 +51,7 @@ public class PostService {
                 post.addImageToPost(image);
             }
         }
+        post.setAuthor(user);
         Post savedPost = postRepository.save(post);
         if (!savedPost.getImages().isEmpty()){
             savedPost.setPreviewImageId(savedPost.getImages().get(0).getId());
@@ -68,13 +74,11 @@ public class PostService {
     public void deletePost(Long id) {
         postRepository.deleteById(id);
     }
-    public Post updatePost(Long id, Post post) {
-        post = postRepository.findById(id)
+    public Post updatePost(Long id, Post updated) {
+        Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("not found"));
-        Post updatedPost = new Post();
-        post.setTitle(updatedPost.getTitle());
-        post.setContent(updatedPost.getContent());
+        post.setTitle(updated.getTitle());
+        post.setContent(updated.getContent());
         return postRepository.save(post);
     }
-
 }
