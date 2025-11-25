@@ -37,8 +37,8 @@ public class PostService {
         post.setLikes(post.getLikes() + 1);
         postRepository.save(post);
     }
-    public void addPost(Post post , MultipartFile file1 , MultipartFile file2 , MultipartFile file3 ,String userEmail) throws IOException {
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new RuntimeException("not found"));
+    public void addPost(Post post , MultipartFile file1 , MultipartFile file2 , MultipartFile file3 ,String username) throws IOException {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("not found"));
         List<MultipartFile> files = List.of(file1, file2, file3);
         boolean previewSet = false;
         for (MultipartFile file : files) {

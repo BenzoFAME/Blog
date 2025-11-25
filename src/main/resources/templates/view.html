@@ -24,11 +24,11 @@
     <a class="logo-text text-decoration-none" th:href="@{/}">EGOROV'S&nbsp;BLOG</a>
 
     <div class="d-flex align-items-center gap-2">
-        <a th:if="${#request.userPrincipal == null}" th:href="@{/login}" class="btn btn-sm btn-outline-secondary">Войти</a>
-        <a th:if="${#request.userPrincipal == null}" th:href="@{/registration}" class="btn btn-sm btn-outline-primary">Регистрация</a>
+        <a th:if="${#authentication == null}" th:href="@{/login}" class="btn btn-sm btn-outline-secondary">Войти</a>
+        <a th:if="${#authentication == null}" th:href="@{/registration}" class="btn btn-sm btn-outline-primary">Регистрация</a>
 
-        <div th:if="${#request.userPrincipal != null}" class="d-flex align-items-center gap-2">
-            <span class="text-muted">Привет, <strong th:text="${#request.userPrincipal.name}">user</strong></span>
+        <div th:if="${#authentication != null}" class="d-flex align-items-center gap-2">
+            <span class="text-muted">Привет, <strong th:text="${#authentication.name}">user</strong></span>
             <form th:action="@{/logout}" method="post" class="m-0">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button class="btn btn-outline-danger btn-sm">Выйти</button>
@@ -66,10 +66,10 @@
 
         <!-- кнопки редактирования для автора/админа -->
         <div class="mb-3">
-            <a th:if="${#request.userPrincipal != null and (#request.userPrincipal.name == post.author.username || #request.isUserInRole('ROLE_ADMIN'))}"
+            <a th:if="${#authentication != null and (#authentication.name == post.author.username or #authorization.expression('hasRole(''ROLE_ADMIN'')'))}"
                th:href="@{'/posts/edit/' + ${post.id}}" class="btn btn-sm btn-outline-primary me-2">✏️ Редактировать</a>
 
-            <form th:if="${#request.userPrincipal != null and (#request.userPrincipal.name == post.author.username || #request.isUserInRole('ROLE_ADMIN'))}"
+            <form th:if="${#authentication != null and (#authentication.name == post.author.username or #authorization.expression('hasRole(''ROLE_ADMIN'')'))}"
                   th:action="@{'/posts/delete/' + ${post.id}}" method="post" style="display:inline" onsubmit="return confirm('Удалить пост?');">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button type="submit" class="btn btn-sm btn-outline-danger">🗑 Удалить</button>
@@ -78,12 +78,8 @@
 
         <!-- лайки -->
         <div class="d-flex align-items-center">
-            <!-- если авторизован — кнопка AJAX -->
-            <button th:if="${#request.userPrincipal != null}" id="like-btn" th:data-id="${post.id}" class="me-2">❤️</button>
-
-            <!-- если не авторизован — ссылка на логин -->
-            <a th:if="${#request.userPrincipal == null}" th:href="@{/login}" class="me-2">❤️</a>
-
+            <button th:if="${#authentication != null}" id="like-btn" th:data-id="${post.id}" class="me-2">❤️</button>
+            <a th:if="${#authentication == null}" th:href="@{/login}" class="me-2">❤️</a>
             <span id="like-count" th:text="${post.likes}">0</span>
         </div>
     </div>
@@ -104,7 +100,7 @@
         </div>
 
         <!-- форма комментария: только для авторизованных -->
-        <div th:if="${#request.userPrincipal != null}">
+        <div th:if="${#authentication != null}">
             <form th:action="@{'/comments/add/' + ${post.id}}" method="post" class="mt-3">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <textarea class="form-control mb-2" name="text" rows="2" placeholder="Напишите комментарий..." required></textarea>
@@ -112,7 +108,7 @@
             </form>
         </div>
 
-        <div th:if="${#request.userPrincipal == null}" class="mt-3">
+        <div th:if="${#authentication == null}" class="mt-3">
             <a th:href="@{/login}" class="btn btn-outline-primary w-100">Войдите, чтобы оставить комментарий</a>
         </div>
     </div>
@@ -156,4 +152,3 @@
 </script>
 </body>
 </html>
-
