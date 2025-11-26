@@ -41,7 +41,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/", "/posts", "/images/**", "/login", "/registration").permitAll()
                         .requestMatchers("/posts/add", "/posts/delete/**", "/posts/edit/**", "/posts/view/**", "/posts/like/**")
                         .hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/profile" , "/profile/avatar/").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/profile" , "/profile/avatar/" , "/profile/edit").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.loginPage("/login").permitAll().defaultSuccessUrl("/")

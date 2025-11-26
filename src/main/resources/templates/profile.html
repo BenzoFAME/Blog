@@ -93,14 +93,12 @@
 <!-- Профиль -->
 <div class="profile-header d-flex align-items-center gap-4">
 
-    <!-- аватар -->
-    <img th:src="@{'/profile/avatar/' + ${user.id}}"
-         onerror="this.src='/images/default-avatar.png'"
-         class="avatar">
+    <img th:if="${user.avatar != null}" th:src="@{'/profile/avatar/' + ${user.id}}" class="avatar">
+    <img th:if="${user.avatar == null}" src="/images/default-avatar.png" class="avatar">
+
 
     <div>
-        <div class="username" th:text="${user.username}">Username</div>
-
+        <h1 th:if="${user != null}" th:text="${user.username}">Username</h1>
         <div class="text-muted" th:text="${user.email}"></div>
 
         <div class="mt-2">
