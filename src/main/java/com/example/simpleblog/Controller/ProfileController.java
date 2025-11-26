@@ -7,6 +7,10 @@ import com.example.simpleblog.Service.UserService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -52,13 +56,21 @@ public class ProfileController {
     @PostMapping("/edit")
     public String updateProfile(Principal principal , Model model , @RequestParam String username , @RequestParam("avatar") MultipartFile avatar) throws IOException {
         User user = userService.findByUsername(principal.getName());
-        if (user != null && username.isBlank()) {
-            user.setUsername(username);
+        if (user != null && !username.isBlank()) {
+            user.setUsername(username.trim());
         }
         if (avatar != null && !avatar.isEmpty()) {
             user.setAvatar(avatar.getBytes());
         }
         userService.save(user);
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .roles(user.getRole().name().replace("ROLE_", ""))
+                .disabled(!user.isEnabled())
+                .build();
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, user.getPassword(), userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         return "redirect:/profile";
     }
     @GetMapping("/avatar/{userId}")
