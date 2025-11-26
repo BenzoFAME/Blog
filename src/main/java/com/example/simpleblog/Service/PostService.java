@@ -23,7 +23,9 @@ public class PostService {
         this.imageRepository = imageRepository;
         this.userRepository = userRepository;
     }
-
+    public List<Post> findByUser(User user){
+        return postRepository.findByAuthor(user);
+    }
     public List<Post> findAll() {
         return postRepository.findAll();
     }

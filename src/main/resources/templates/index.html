@@ -83,17 +83,25 @@
     <h1 class="logo-text">TIPA&nbsp;INSTAGRAMM</h1>
 
     <div class="d-flex gap-2">
-        <!-- Кнопка вход/регистрация для неавторизованных -->
+
+        <!-- Мой профиль — только для авторизованного -->
+        <a th:if="${#authorization.expression('isAuthenticated()')}"
+           th:href="@{/profile}"
+           class="btn btn-outline-secondary">
+            Мой профиль
+        </a>
+
         <a th:if="${#authorization.expression('isAnonymous()')}"
            href="/login"
            class="btn btn-outline-primary">
             Вход / Регистрация
         </a>
-        <form th:if="${#authorization.expression('isAuthenticated()')}" th:action="@{/logout}" method="post" style="display:inline;">
+
+        <form th:if="${#authorization.expression('isAuthenticated()')}"
+              th:action="@{/logout}" method="post" style="display:inline;">
             <button type="submit" class="btn btn-outline-danger">Выйти</button>
         </form>
 
-        <!-- Кнопка Новый пост для авторизованных -->
         <a th:if="${#authorization.expression('isAuthenticated()')}"
            href="/posts/add"
            class="btn btn-add">
@@ -107,7 +115,7 @@
 <div class="container mt-4" style="max-width: 700px;">
     <div th:each="post : ${posts}" class="post-card shadow-sm">
 
-        <!-- ✅ Карусель изображений -->
+        <!-- Карусель -->
         <div th:if="${post.images != null and !post.images.isEmpty()}">
             <div th:id="'carouselPost' + ${post.id}" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
@@ -117,7 +125,6 @@
                     </div>
                 </div>
 
-                <!-- Стрелки навигации -->
                 <button class="carousel-control-prev" type="button"
                         th:attr="data-bs-target='#carouselPost' + ${post.id}" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon"></span>
@@ -129,23 +136,38 @@
             </div>
         </div>
 
-        <!-- Если нет картинок -->
+        <!-- Без картинок -->
         <div th:if="${post.images == null or post.images.isEmpty()}">
             <img th:if="${post.previewImageId != null}" th:src="@{'/images/' + ${post.previewImageId}}" alt="preview">
         </div>
 
-        <!-- Контент поста -->
         <div class="post-content">
             <h4 th:text="${post.title}"></h4>
-            <p class="text-muted" th:text="${post.author != null ? post.author.username : 'Гость'}"></p>
+
+            <!-- ⭐ Автор — ссылка -->
+            <p class="text-muted">
+                <a th:if="${post.author != null}"
+                   th:href="@{'/profile/' + ${post.author.id}}"
+                   th:text="${post.author.username}"
+                   class="text-decoration-none text-muted fw-bold"></a>
+                <span th:if="${post.author == null}">Гость</span>
+            </p>
+
             <p th:text="${post.content.length() > 150 ? post.content.substring(0,150) + '...' : post.content}"></p>
         </div>
 
-        <!-- Комментарии -->
+        <!-- Комменты -->
         <div class="px-3 pb-3">
             <div th:each="comment : ${postComments[post.id]}">
                 <p class="comment-preview">
-                    <span th:text="${comment.author != null ? comment.author.username : 'Гость'}"></span>:
+
+                    <!-- ⭐ Автор комментария — ссылка -->
+                    <a th:if="${comment.author != null}"
+                       th:href="@{'/profile/' + ${comment.author.id}}"
+                       th:text="${comment.author.username}"
+                       class="fw-bold text-decoration-none text-dark"></a>
+
+                    <span th:if="${comment.author == null}">Гость</span>:
                     <span th:text="${comment.text}"></span>
                 </p>
             </div>
