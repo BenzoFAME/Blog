@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Чат с ' + ${partner.username}">Чат</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h3 th:text="'Чат с ' + ${partner.username}"></h3>
+
+    <div class="border p-3 mb-3" style="height:400px; overflow-y:scroll;">
+        <div th:each="message : ${chat}">
+            <div th:classappend="${message.fromUser.username == #authentication.name} ? 'text-end' : 'text-start'">
+                <b th:text="${message.fromUser.username}"></b>:
+                <span th:text="${message.text}"></span>
+                <small class="text-muted" th:text="${#temporals.format(message.timestamp, 'dd.MM.yyyy HH:mm')}"></small>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <form th:action="@{/messages/send}" method="post" class="d-flex gap-2">
+        <input type="hidden" name="userId" th:value="${partner.id}">
+        <input type="text" name="text" class="form-control" placeholder="Ваше сообщение">
+        <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+</div>
+</body>
+</html>

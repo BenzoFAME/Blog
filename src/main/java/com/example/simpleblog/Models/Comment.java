@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 @Table(name = "comment")
@@ -21,4 +24,6 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "author_id")
     private User author;
+    @OneToMany(mappedBy = "comment" , cascade = CascadeType.ALL , orphanRemoval = true)
+    private List<SubComment> subComments = new ArrayList<>();
 }

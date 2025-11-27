@@ -41,11 +41,15 @@ public class WebSecurityConfig {
                         .requestMatchers("/", "/posts", "/images/**", "/login", "/registration").permitAll()
                         .requestMatchers("/posts/add", "/posts/delete/**", "/posts/edit/**", "/posts/view/**", "/posts/like/**")
                         .hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/messages" , "/messages/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/subcomment/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/profile" , "/profile/avatar/" , "/profile/edit").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.loginPage("/login").permitAll().defaultSuccessUrl("/")
                 )
+                .rememberMe(remember -> remember.tokenValiditySeconds(60*60*24*30)
+                        .key("SUPER_GEYSKIY_KEY_V_MIRE_12345").userDetailsService(customUserDetailsService))
                 .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
         return http.build();
     }
